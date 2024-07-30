@@ -1,14 +1,14 @@
+
 import os
 from data.base_dataset import BaseDataset, get_params, get_transform
 from data.image_folder import make_dataset
 from PIL import Image
-
+import torch
 
 class AlignedDataset(BaseDataset):
     """A dataset class for paired image dataset.
 
-    It assumes that the directory '/path/to/data/train' contains image pairs in the form of {A,B}.
-    During test time, you need to prepare a directory '/path/to/data/test'.
+    It assumes that the directory '/path/to/data/train' contains images in the form of {A1, A2, B} concatenated side by side.
     """
 
     def __init__(self, opt):
@@ -18,8 +18,8 @@ class AlignedDataset(BaseDataset):
             opt (Option class) -- stores all the experiment flags; needs to be a subclass of BaseOptions
         """
         BaseDataset.__init__(self, opt)
-        self.dir_AB = os.path.join(opt.dataroot, opt.phase)  # get the image directory
-        self.AB_paths = sorted(make_dataset(self.dir_AB, opt.max_dataset_size))  # get image paths
+        self.dir_ABC = os.path.join(opt.dataroot, opt.phase)  # get the image directory
+        self.ABC_paths = sorted(make_dataset(self.dir_ABC, opt.max_dataset_size))  # get image paths
         assert(self.opt.load_size >= self.opt.crop_size)   # crop_size should be smaller than the size of loaded image
         self.input_nc = self.opt.output_nc if self.opt.direction == 'BtoA' else self.opt.input_nc
         self.output_nc = self.opt.input_nc if self.opt.direction == 'BtoA' else self.opt.output_nc
@@ -30,31 +30,38 @@ class AlignedDataset(BaseDataset):
         Parameters:
             index - - a random integer for data indexing
 
-        Returns a dictionary that contains A, B, A_paths and B_paths
-            A (tensor) - - an image in the input domain
+        Returns a dictionary that contains A (concatenated A1 and A2), B, A_paths and B_paths
+            A (tensor) - - concatenated images in the input domain
             B (tensor) - - its corresponding image in the target domain
             A_paths (str) - - image paths
             B_paths (str) - - image paths (same as A_paths)
         """
         # read a image given a random integer index
-        AB_path = self.AB_paths[index]
-        AB = Image.open(AB_path).convert('RGB')
-        # split AB image into A and B
-        w, h = AB.size
-        w2 = int(w / 2)
-        A = AB.crop((0, 0, w2, h))
-        B = AB.crop((w2, 0, w, h))
+        ABC_path = self.ABC_paths[index]
+        ABC = Image.open(ABC_path).convert('RGB')
 
-        # apply the same transform to both A and B
-        transform_params = get_params(self.opt, A.size)
-        A_transform = get_transform(self.opt, transform_params, grayscale=(self.input_nc == 1))
+        # split ABC image into A1, A2, and B
+        w, h = ABC.size
+        w3 = int(w / 3)
+        A1 = ABC.crop((0, 0, w3, h))
+        A2 = ABC.crop((w3, 0, 2*w3, h))
+        B = ABC.crop((2*w3, 0, w, h))
+
+        # apply the same transform to A1, A2, and B
+        transform_params = get_params(self.opt, A1.size)
+        A1_transform = get_transform(self.opt, transform_params, grayscale=(self.input_nc == 1))
+        A2_transform = get_transform(self.opt, transform_params, grayscale=(self.input_nc == 1))
         B_transform = get_transform(self.opt, transform_params, grayscale=(self.output_nc == 1))
 
-        A = A_transform(A)
+        A1 = A1_transform(A1)
+        A2 = A2_transform(A2)
         B = B_transform(B)
 
-        return {'A': A, 'B': B, 'A_paths': AB_path, 'B_paths': AB_path}
+        # concatenate A1 and A2 along the channel dimension
+        A = torch.cat([A1, A2], 0)
+
+        return {'A': A, 'B': B, 'A_paths': ABC_path, 'B_paths': ABC_path}
 
     def __len__(self):
         """Return the total number of images in the dataset."""
-        return len(self.AB_paths)
+        return len(self.ABC_paths)
