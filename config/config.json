@@ -15,7 +15,7 @@
   "save_epoch_freq": 1,
   "save_latest_freq": 50,
   "val_freq": 1,
-  "batch_size": 1,
+  "batch_size": 4,
   "gpu_ids": "0",
   "checkpoints_dir": "./checkpoints",
   "ngf": 64,

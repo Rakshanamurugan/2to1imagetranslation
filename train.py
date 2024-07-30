@@ -50,13 +50,9 @@ if __name__ == '__main__':
 
             # # Print the filenames before each iteration
             A_paths = model.image_paths  # Get image paths
-            # for img_path in A_paths:
-            #     print(f"Filename: {img_path}")
-            # Print filenames before printing losses
-            filenames = data['A_paths' if opt.direction == 'AtoB' else 'B_paths']
-            print("Processing the following files:")
-            for filename in filenames:
-                print(filename)
+
+
+
 
             if total_iters % opt.display_freq == 0:  # display images on visdom and save images to a HTML file
                 save_result = total_iters % opt.update_html_freq == 0
@@ -86,7 +82,7 @@ if __name__ == '__main__':
         # Log one image from the last batch of the epoch
         if last_batch_data:
             model.set_input(last_batch_data)  # Set the model input to the last batch
-            visuals = model.get_current_visuals()
+            visuals = model.get_current_visuals_train()
             real_A_images = visuals['real_A']
             real_B_images = visuals['real_B']
             fake_B_images = visuals['fake_B']
@@ -117,7 +113,7 @@ if __name__ == '__main__':
             wandb_img = wandb.Image(concatenated_img, mode='L', caption=f"Epoch {epoch} - Combined Image - {img_path}")
             wandb.log({f"Epoch {epoch} - Combined Image": wandb_img})
 
-            print(f"Logged training image: {img_path}")
+
 
         # Perform validation at the end of each epoch
         if epoch % opt.val_freq == 0:

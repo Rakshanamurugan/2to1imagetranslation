@@ -1,6 +1,6 @@
 {
-  "dataroot": "/media/e210-pc34/System/data2",
-  "name": "mriimagetranslation1",
+  "dataroot": "/media/e210-pc34/gjsalome/train2input/ABC",
+  "name": "mriimagetranslationconfig_trail",
   "model": "pix2pix",
   "dataset_mode": "aligned",
   "input_nc": 1,
