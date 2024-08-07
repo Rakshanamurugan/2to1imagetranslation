@@ -135,7 +135,7 @@ class BaseModel(ABC):
                 scheduler.step()
         lr = self.optimizers[0].param_groups[0]['lr']
         print('learning rate %.7f -> %.7f' % (old_lr, lr))
-
+    #2to1
     def get_current_visuals_train(self):
         """Return visualization images. train.py will display these images with visdom, and save the images to a HTML"""
         visual_ret = OrderedDict()
@@ -147,6 +147,24 @@ class BaseModel(ABC):
         """Return visualization images."""
         return {'real_A1': self.real_A[:, 0:1, :, :], 'real_A2': self.real_A[:, 1:2, :, :], 'fake_B': self.fake_B,
                 'real_B': self.real_B}
+    # 3 to 1
+    def get_current_visuals_train_3(self):
+        """Return visualization images. train.py will display these images with visdom, and save the images to a HTML"""
+        visual_ret = OrderedDict()
+        for name in self.visual_names:
+            if isinstance(name, str):
+                visual_ret[name] = getattr(self, name)
+        return visual_ret
+
+    def get_current_visuals_test_3(self):
+        """Return visualization images for 3 input images to 1 target image."""
+        return {
+            'real_A1': self.real_A[:, 0:1, :, :],  # First input image
+            'real_A2': self.real_A[:, 1:2, :, :],  # Second input image
+            'real_A3': self.real_A[:, 2:3, :, :],  # Third input image
+            'fake_B': self.fake_B,  # Generated output
+            'real_B': self.real_B  # Ground truth target
+        }
 
     def get_current_losses(self):
         """Return training losses / errors. train.py will print out these errors on console, and save them to a file"""

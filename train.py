@@ -94,12 +94,12 @@ if __name__ == '__main__':
 
                 img_A_ch1 = img_A_np[..., 0]
                 img_A_ch2 = img_A_np[..., 1]
-
+                img_A_ch3 = img_A_np[..., 2]
                 img_B_np = img_B_np[..., 0]
                 img_fake_B_np = img_fake_B_np[..., 0]
 
                 # Ensure all images have a single channel and same dimensions
-                img_A_concat = np.concatenate([img_A_ch1, img_A_ch2], axis=1)
+                img_A_concat = np.concatenate([img_A_ch1, img_A_ch2,img_A_ch3],axis=1)
                 img_concat = np.concatenate([img_A_concat, img_B_np, img_fake_B_np], axis=1)  # Concatenate along width
                 return img_concat
 

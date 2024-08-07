@@ -59,7 +59,8 @@ class BaseOptions():
         parser.add_argument('--wandb_project_name', type=str, default='CycleGAN-and-pix2pix', help='specify wandb project name')
         # Add a new argument for the config file
         parser.add_argument('--config', type=str, help='path to the configuration file')
-
+        parser.add_argument('--num_input_channels', type=int, default=3, help='number of input channels')
+        parser.add_argument('--num_output_channels', type=int, default=1, help='number of output channels')
         self.initialized = True
         return parser
 
